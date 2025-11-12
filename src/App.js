@@ -8,11 +8,19 @@ const initialItems = [
 
 export default function App() {
   const [items, setItems] = useState(initialItems);
+
+  function handleAddItems(item) {
+    setItems((items) => [...items, item]);
+  }
+  function handleDeleteItem(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+
   return (
     <div className="App">
       <Logo />
-      <Form setItems={setItems} items={items} />
-      <PackingList items={items} />
+      <Form onAddItems={handleAddItems} />
+      <PackingList items={items} onDeleteItem={handleDeleteItem} />
       <Stats />
     </div>
   );
@@ -22,24 +30,22 @@ function Logo() {
   return <h1>🏝️Far Away🧳</h1>;
 }
 
-function Form(props) {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
   function handleSubmit(e) {
     e.preventDefault();
     // Form submission logic here
     if (!description) return;
+    const newItem = {
+      id: Date.now(),
+      description,
+      quantity,
+      packed: false,
+    };
+    onAddItems(newItem);
     setDescription("");
     setQuantity(1);
-    props.setItems([
-      ...props.items,
-      {
-        id: props.items.length + 1,
-        description: description,
-        quantity: quantity,
-        packed: false,
-      },
-    ]);
   }
 
   return (
@@ -66,13 +72,12 @@ function Form(props) {
   );
 }
 
-function PackingList(props) {
-  console.log(props);
+function PackingList({ items, onDeleteItem }) {
   return (
     <div className="list">
       <ul>
-        {props.items.map((item) => (
-          <Item item={item} key={item.id}></Item>
+        {items.map((item) => (
+          <Item item={item} key={item.id} onDeleteItem={onDeleteItem} />
         ))}
       </ul>
     </div>
@@ -87,13 +92,13 @@ function Stats() {
   );
 }
 
-function Item({ item }) {
+function Item({ item, onDeleteItem }) {
   return (
     <li key={item.id}>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(item.id)}>❌</button>
     </li>
   );
 }
