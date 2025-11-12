@@ -32,7 +32,7 @@ export default function App() {
         onDeleteItem={handleDeleteItem}
         onToggleItem={handleToggleItem}
       />
-      <Stats />
+      <Stats items={items} />
     </div>
   );
 }
@@ -100,10 +100,26 @@ function PackingList({ items, onDeleteItem, onToggleItem }) {
   );
 }
 
-function Stats() {
+function Stats({ items }) {
+  if (items.length === 0) {
+    return (
+      <footer className="stats">
+        <em>🧳 Your packing list is empty. Start adding some items! 🛫</em>
+      </footer>
+    );
+  }
+  const numItems = items.length;
+  const numPacked = items.filter((item) => item.packed).length;
+  const percentage =
+    numItems === 0 ? 0 : Math.round((numPacked / numItems) * 100);
   return (
     <footer className="stats">
-      <em>🧳 You have X items on your list, and you already packed X (X%)</em>
+      <em>
+        {percentage === 100
+          ? "🎉 You are ready to go! 🛫"
+          : ` 🧳 You have ${numItems} items on your list, and you already packed
+        ${numPacked} (${percentage}%)`}
+      </em>
     </footer>
   );
 }
@@ -113,7 +129,7 @@ function Item({ item, onDeleteItem, onToggleItem }) {
     <li key={item.id}>
       <input
         type="checkbox"
-        value={item.packed}
+        checked={item.packed}
         onChange={() => onToggleItem(item.id)}
       />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
